@@ -1,0 +1,18 @@
+common:
+  harness: pytest
+  harness_config:
+    pytest_dut_scope: session
+    fixture: openthread_border_router
+  tags:
+    - net
+    - openthread
+  depends_on: openthread
+sample:
+  description: Test Thread and IEEE 802.15.4 using the OpenThread shell
+  name: OpenThread Shell
+tests:
+  sample.net.openthread.shell:
+    platform_allow:
+      - cc1352p7_lp/cc1352p7
+    integration_platforms:
+      - cc1352p7_lp/cc1352p7
