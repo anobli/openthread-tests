@@ -1,0 +1,7 @@
+adb_shell>=0.4.4
+pyspinel>=1.0.3
+pytest>=7.0.0
+pytest-timeout>=2.1.0
+pyserial>=3.5
+colorlog>=6.0.0
+openthread-otci>=0.0.1
