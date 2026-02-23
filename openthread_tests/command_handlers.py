@@ -75,7 +75,7 @@ if TWISTER:
             self.__line_read_callback = None
 
         def __repr__(self):
-            return f"twister: {self.__dut.device_config.serial}"
+            return f"twister: {self.__dut.device_config.id}"
 
         def execute_command(self, cmd: str, timeout: float) -> List[str]:
             zephyr_cmd = f'ot {cmd}'
