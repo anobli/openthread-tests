@@ -68,6 +68,8 @@ and then create a hardware map file for your device. Here is an example for a cc
     - --openocd=/usr/bin/openocd
     - --openocd-search=/usr/share/openocd/
   serial: /dev/ttyACM0
+  fixtures:
+    - openthread_border_router
 ```
 
 Then, create a second file that defines some data used by tests.
