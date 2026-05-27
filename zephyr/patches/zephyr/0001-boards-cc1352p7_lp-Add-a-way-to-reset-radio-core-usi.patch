@@ -1,0 +1,49 @@
+From 597ceae9ca76668d1f2474cc84c8ec4794918be1 Mon Sep 17 00:00:00 2001
+From: Alexandre Bailon <abailon@baylibre.com>
+Date: Tue, 25 Nov 2025 11:34:23 +0100
+Subject: [PATCH] boards: cc1352p7_lp: Add a way to reset radio core using JTAG
+
+The radio driver hangs when the application core is reset by JTAG.
+We can't use the system reset because it also reset the JTAG itself
+and cause a lot of error in OpenOCD.
+This updates OpenOCD script to reset the radio core and makes possible
+using JTAG for debugging radio.
+
+Signed-off-by: Alexandre Bailon <abailon@baylibre.com>
+---
+ .../ti/cc1352p7_launchpad/support/openocd.cfg  | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/boards/ti/cc1352p7_launchpad/support/openocd.cfg b/boards/ti/cc1352p7_launchpad/support/openocd.cfg
+index e66d8841104..f86b5a87fbd 100644
+--- a/boards/ti/cc1352p7_launchpad/support/openocd.cfg
++++ b/boards/ti/cc1352p7_launchpad/support/openocd.cfg
+@@ -1,3 +1,13 @@
++# SPDX-License-Identifier: GPL-2.0-or-later
++
++#
++# TI CC13x2P7 LaunchPad Evaluation Kit
++#
++
++source [find mem_helper.tcl]
++set  PRCM_BASE_ADDR    0x40082000
++set  PDCTL0RFC         [expr       {$PRCM_BASE_ADDR     +  0x00000130}]
++
+ # Serial could be found using the following command:
+ # lsusb -d 0451:bef3 -v | grep -i iserial
+ if { [info exists _ZEPHYR_BOARD_SERIAL] } {
+@@ -5,3 +15,11 @@ if { [info exists _ZEPHYR_BOARD_SERIAL] } {
+ }
+ 
+ source [find board/ti_cc26x2x7_launchpad.cfg]
++
++$_TARGETNAME configure -event reset-start {
++    global PDCTL0RFC
++
++    # Reset radio core
++    mww phys $PDCTL0RFC 0
++    mww phys $PDCTL0RFC 1
++}
+-- 
+2.53.0
+
