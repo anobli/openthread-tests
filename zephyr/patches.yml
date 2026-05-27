@@ -1,0 +1,10 @@
+patches:
+  - path: zephyr/0001-boards-cc1352p7_lp-Add-a-way-to-reset-radio-core-usi.patch
+    sha256sum: 608f053911b3294223d922eadc81c173014466eea4030797e4d78646c5e03b0a
+    module: third-party/zephyr
+    author: Alexandre Bailon
+    email: abailon@baylibre.com
+    date: 2025-11-25
+    upstreamable: false
+    comments: |
+      Required to flash a radio firmware using OpenOCD.
