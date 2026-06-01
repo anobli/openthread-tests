@@ -64,9 +64,37 @@ def pytest_addoption(parser):
     parser.addoption('--ot-hardware-map')
 
 
+def get_devices_from_hardware_map(hardware_map) -> List[str]:
+    """
+    Get the list of device serial paths from an OT hardware map file.
+
+    The OT hardware map is the YAML file passed through ``--ot-hardware-map``.
+    Each entry describing a device may provide a ``serial`` field pointing to
+    the serial device path (e.g. /dev/ttyACM0). Entries are sorted by their
+    ``id`` so that the order is deterministic.
+
+    Args:
+        hardware_map: Path to the OT hardware map file.
+    """
+
+    if not hardware_map:
+        return []
+
+    with open(hardware_map) as yaml_file:
+        hwm = yaml.load(yaml_file, Loader=SafeLoader)
+
+    if not hwm:
+        return []
+
+    hwm.sort(key=lambda x: x.get('id', ''))
+
+    return [h['serial'] for h in hwm if h.get('serial')]
+
+
 def get_test_devices(request) -> List[str]:
     """
-    Get list of device paths from environment variable or command line.
+    Get list of device paths from command line, environment variable,
+    or the OT hardware map.
 
     Args:
         request: Optional pytest request object
@@ -87,6 +115,17 @@ def get_test_devices(request) -> List[str]:
     devices_str = os.environ.get("OPENTHREAD_TEST_DEVICES", "")
     if devices_str:
         return [d.strip() for d in devices_str.split(",") if d.strip()]
+
+    # Then check the OT hardware map
+    if request is not None:
+        try:
+            hardware_map = request.config.getoption("--ot-hardware-map")
+        except (AttributeError, RuntimeError):
+            hardware_map = None
+
+        devices_from_map = get_devices_from_hardware_map(hardware_map)
+        if devices_from_map:
+            return devices_from_map
 
     # Fall back to defaults
     return DEFAULT_DEVICES
