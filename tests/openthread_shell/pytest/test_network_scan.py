@@ -11,6 +11,13 @@ import otci
 from openthread_tests.utils import ot_helper_init_network
 
 
+def util_discover_retry(dut_node: otci.OTCI, retries: int = 3):
+    for i in range(retries):
+        networks = dut_node.discover()
+        if networks:
+            return networks
+    return []
+
 @pytest.mark.timeout(60)
 def test_node_to_node_network_scan(dut_node: otci.OTCI, node1: otci.OTCI) -> None:
     """
@@ -34,7 +41,7 @@ def test_node_to_node_network_scan(dut_node: otci.OTCI, node1: otci.OTCI) -> Non
 
     # Scan for networks with the joiner device
     dut_node.ifconfig_up()
-    networks = dut_node.discover()
+    networks = util_discover_retry(dut_node)
     assert networks, "Failed to start network scan"
 
     # Verify that the network was found
@@ -61,7 +68,7 @@ def test_network_scan_otbr(dut_node: otci.OTCI, otbr_test_values) -> None:
 
     # Scan for networks with the joiner device
     dut_node.ifconfig_up()
-    networks = dut_node.discover()
+    networks = util_discover_retry(dut_node)
     assert networks, "No network found"
 
     # Verify that the network was found
