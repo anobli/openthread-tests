@@ -39,7 +39,31 @@ def ot_hardware_map(request):
 
 
 @pytest.fixture()
-def otbr_test_values(ot_hardware_map):
+def device_eui64(request):
+    return request.config.getoption('--device-eui64')
+
+@pytest.fixture()
+def otbr_network_name(request):
+    return request.config.getoption('--otbr-network-name')
+
+@pytest.fixture()
+def otbr_network_key(request):
+    return request.config.getoption('--otbr-network-key')
+
+@pytest.fixture()
+def otbr_panid(request):
+    return request.config.getoption('--otbr-panid')
+
+@pytest.fixture()
+def extpanid(request):
+    return request.config.getoption('--otbr-extpanid')
+
+@pytest.fixture()
+def otbr_channel(request):
+    return request.config.getoption('--otbr-channel')
+
+@pytest.fixture()
+def otbr_test_values(ot_hardware_map, request):
     if ot_hardware_map:
         with open(ot_hardware_map) as yaml_file:
             hwm = yaml.load(yaml_file, Loader=SafeLoader)
@@ -49,6 +73,17 @@ def otbr_test_values(ot_hardware_map):
             # FIXME: This returns the first one for the moment
             for h in hwm:
                 return h['otbr']
+    else:
+        try:
+            return {
+                'network_name':  request.getfixturevalue('otbr_network_name'),
+                'network_key': request.getfixturevalue('otbr_network_key'),
+                'panid': request.getfixturevalue('otbr_panid'),
+                'extpanid': request.getfixturevalue('extpanid'),
+                'channel': request.getfixturevalue('otbr_channel'),
+            }
+        except pytest.FixtureLookupError:
+            return None
 
     return None
 
@@ -62,6 +97,12 @@ def pytest_addoption(parser):
         help="Comma-separated list of OpenThread RCP/NCP device paths (e.g. /dev/ttyUSB0,/dev/ttyUSB1)"
     )
     parser.addoption('--ot-hardware-map')
+    parser.addoption('--device-eui64')
+    parser.addoption('--otbr-network-name')
+    parser.addoption('--otbr-network-key')
+    parser.addoption('--otbr-panid')
+    parser.addoption('--otbr-extpanid')
+    parser.addoption('--otbr-channel')
 
 
 def get_devices_from_hardware_map(hardware_map) -> List[str]:
